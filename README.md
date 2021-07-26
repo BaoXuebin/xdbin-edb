@@ -21,12 +21,16 @@ class User {
 
 **使用**
 ```java
-// 根据ID查询
-User.id(1L);
-// 条件查询
-User.get(condition -> condition.id(1L).name("Leo"));
-User.list(condition -> condition.id(1L).name("Leo"));
-User.page(condition -> condition.id(1L).name("Leo", 1, 10));
-// 新增
-User.insert(entity -> entity.id(1L).name("Bao"));
+public class Main {
+
+    public static void main(String[] args) {
+        User.insert(entity -> entity.id(1L).name("Leo"));
+        User.insert(entity -> entity.id(2L).name("Bao"));
+
+        System.out.println(User.id(1L));
+        System.out.println(User.get(condition -> condition.name("Bao")));
+        System.out.println(User.get(condition -> condition.name("1")));
+    }
+
+}
 ```
