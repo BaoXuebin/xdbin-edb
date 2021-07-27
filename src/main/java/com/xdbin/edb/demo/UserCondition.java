@@ -1,12 +1,10 @@
-package com.xdbin.edb.user;
+package com.xdbin.edb.demo;
 
 /**
  * @author BaoXuebin
  * @since 2021/7/26
  */
 public class UserCondition {
-
-    private static UserCondition condition;
 
     private Long id;
     private String name;
@@ -28,19 +26,13 @@ public class UserCondition {
     }
 
     public UserCondition id(Long id) {
-        if (condition == null) {
-            condition = new UserCondition();
-        }
-        condition.setId(id);
-        return condition;
+        this.setId(id);
+        return this;
     }
 
     public UserCondition name(String name) {
-        if (condition == null) {
-            condition = new UserCondition();
-        }
-        condition.setName(name);
-        return condition;
+        this.setName(name);
+        return this;
     }
 
     @Override

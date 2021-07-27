@@ -1,4 +1,4 @@
-package com.xdbin.edb.user;
+package com.xdbin.edb.demo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,48 +20,52 @@ public class User {
     private String name;
 
     public static User id(Long userId) {
-        Optional<User> result = user.stream().filter(u -> {
-            return Objects.equals(userId, u.getUserId());
-        }).findFirst();
-
+        Optional<User> result = user.stream().filter(u -> Objects.equals(userId, u.getUserId())).findFirst();
         return result.orElse(null);
     }
 
-    public static User get(Function<UserCondition, UserCondition> getCondition) {
-        UserCondition userCondition = getCondition.apply(new UserCondition());
-
+    public static User get(Function<UserCondition, UserCondition> getQuery) {
+        UserCondition userCondition = getQuery.apply(new UserCondition());
         for (User u : user) {
             if (match(u, userCondition)) {
                 return u;
             }
         }
-
         return null;
+    }
+
+    public static List<User> list(Function<UserCondition, UserCondition> getQuery) {
+        if (getQuery == null) {
+            return user;
+        }
+        UserCondition userCondition = getQuery.apply(new UserCondition());
+        return user.stream().filter(u -> match(u, userCondition)).collect(Collectors.toList());
     }
 
     public static User insert(Function<UserCondition, UserCondition> getCondition) {
         UserCondition userCondition = getCondition.apply(new UserCondition());
-
         User newUser = new User();
         newUser.setUserId(userCondition.getId());
         newUser.setName(userCondition.getName());
         user.add(newUser);
-
         return newUser;
     }
 
-    private static boolean match(User u, UserCondition userCondition) {
-        if (Objects.nonNull(userCondition.getId())) {
-            return !Objects.equals(u.getUserId(), userCondition.getId());
-        }
-        if (Objects.nonNull(userCondition.getName())) {
-            return !Objects.equals(u.getName(), userCondition.getName());
-        }
-        return true;
+    public static Integer delete(Function<UserCondition, UserCondition> getQuery) {
+        UserCondition userCondition = getQuery.apply(new UserCondition());
+        AtomicInteger count = new AtomicInteger(0);
+        user = user.stream().filter(u -> {
+            if (match(u, userCondition)) {
+                count.getAndIncrement();
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toList());
+        return count.get();
     }
 
-    public Integer update(Function<UserCondition, UserCondition> getCondition) {
-        UserCondition userCondition = getCondition.apply(new UserCondition());
+    public Integer update(Function<UserCondition, UserCondition> entity) {
+        UserCondition userCondition = entity.apply(new UserCondition());
 
         AtomicInteger count = new AtomicInteger(0);
         user.stream().filter(u -> match(this, userCondition)).forEach(u -> {
@@ -77,19 +81,14 @@ public class User {
         return count.get();
     }
 
-    public Integer delete(Function<UserCondition, UserCondition> getCondition) {
-        UserCondition userCondition = getCondition.apply(new UserCondition());
-
-        AtomicInteger count = new AtomicInteger(0);
-        user = user.stream().filter(u -> {
-            if (match(u, userCondition)) {
-                count.getAndIncrement();
-                return false;
-            }
-            return true;
-        }).collect(Collectors.toList());
-
-        return count.get();
+    private static boolean match(User u, UserCondition userCondition) {
+        if (Objects.nonNull(userCondition.getId()) && !Objects.equals(u.getUserId(), userCondition.getId())) {
+            return false;
+        }
+        if (Objects.nonNull(userCondition.getName()) && !Objects.equals(u.getName(), userCondition.getName())) {
+            return false;
+        }
+        return true;
     }
 
     public Long getUserId() {
